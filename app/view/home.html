@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- vue组件 -->
+  <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .qr-view {
+      width: 300px;
+      overflow: hidden;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 15%;
+      margin: 0 auto;
+    }
+
+    .view-title {
+      font-size: 30px;
+      color: #333;
+      text-align: center;
+    }
+
+    .view-time {
+      font-size: 14px;
+      color: red;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .view-img {
+      display: block;
+      width: 300px;
+      height: 300px;
+      margin: 0 auto 10px;
+    }
+
+    .view-btn {
+      width: 140px;
+      line-height: 38px;
+      text-align: center;
+      font-weight: bold;
+      margin: 0 auto 0;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: block;
+      border: 1px solid #d2a000;
+      color: #fff;
+      margin-top: 20px;
+      box-shadow: 0 1px 2px #fedd71 inset, 0 -1px 0 #a38b39 inset, 0 -2px 3px #fedd71 inset;
+      background: -webkit-linear-gradient(top, #fece34, #d8a605);
+      background: -moz-linear-gradient(top, #fece34, #d8a605);
+      background: linear-gradient(top, #fece34, #d8a605);
+    }
+
+    .view-tips {
+      font-size: 12px;
+      line-height: 14px;
+      color: #999;
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="qr-view" id="app">
+    <p class="view-title">微信扫码登录</p>
+    <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
+    <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
+    <button v-else class="view-btn" @click="reload">重新获取</button>
+    <span v-if="showQrcode" class="view-tips">
+      1、请使用学习平台绑定的微信扫码登录。
+    </span>
+    <span v-if="showQrcode" class="view-tips">
+      2、请在2分钟内完成登录。
+    </span>
+    <span v-if="showQrcode" class="view-tips">
+      3、登录完成后自动开始刷课。无需其他操作。
+    </span>
+    <span v-if="showQrcode" class="view-tips">
+      4、开始刷课后会有邮件通知，如未收到请联系作者。
+    </span>
+    <span v-if="showQrcode" class="view-tips">
+      5、收到通知后关闭此页面即可。
+    </span>
+    <span v-if="showQrcode" class="view-tips">
+      6、刷课大概需要2天时间，完成后会收到邮件通知。
+    </span>
+  </div>
+</body>
+<script>
+  new Vue({
+    el: '#app',
+    data () {
+      return {
+        remainder: 100,
+        showQrcode: true
+      }
+    },
+    created () {
+      const timer = setInterval(() => {
+        this.remainder--
+        if (this.remainder <= 0) {
+          clearInterval(timer)
+          this.showQrcode = false
+        }
+      }, 1000)
+    },
+    methods: {
+      reload () {
+        window.location.reload()
+      }
+    }
+  })
+</script>
+
+</html>
