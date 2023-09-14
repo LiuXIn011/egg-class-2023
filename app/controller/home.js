@@ -23,7 +23,7 @@ class HomeController extends Controller {
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
-      .usingServer('http://192.168.186.130:3000/webdriver')
+      // .usingServer('http://192.168.186.130:3000/webdriver')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
@@ -259,7 +259,7 @@ class HomeController extends Controller {
     const { ctx } = this;
     ctx.logger.info(`课程：${currentClass.title}=》巡查程序运行中`);
     // 每分钟巡查一次
-    const timer = setInterval(async function() {
+    const timer = setInterval(async () => {
       ctx.logger.info(`课程：${currentClass.title}=》开始巡查`);
       // 获取url
       const url = await driver.getCurrentUrl();
