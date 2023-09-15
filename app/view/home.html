@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <!-- vue组件 -->
   <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+  <!-- axios -->
+  <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录</title>
   <style>
@@ -47,6 +49,8 @@
     }
 
     .view-btn {
+      display: block;
+      text-decoration: none;
       width: 140px;
       line-height: 38px;
       text-align: center;
@@ -64,13 +68,7 @@
       background: -moz-linear-gradient(top, #fece34, #d8a605);
       background: linear-gradient(top, #fece34, #d8a605);
     }
-    .view-link{
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 16px;
-    }
+
     .view-tips {
       font-size: 12px;
       line-height: 14px;
@@ -83,11 +81,11 @@
 
 <body>
   <div class="qr-view" id="app">
-    <p class="view-title">微信扫码登录</p>
+    <p class="view-title">{{isLogin?'登录成功':'微信扫码登录'}}</p>
     <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
     <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
     <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
-    <a class="view-link" href="/class/getProgress?q=<%- uuid %>">进度查询链接</a>
+    <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a>
     <span v-if="showQrcode" class="view-tips">
       1、请使用学习平台绑定的微信扫码登录。
     </span>
@@ -115,12 +113,15 @@
       return {
         remainder: 100,
         showReload: false,
-        showQrcode: true
+        isLogin: false,
+        showQrcode: true,
+        timer: ''
       }
     },
     created () {
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         this.remainder--
+        this.getLoginStatus()
         if (this.remainder <= 0) {
           clearInterval(timer)
           this.showQrcode = false
@@ -131,6 +132,24 @@
     methods: {
       reload () {
         window.location.reload()
+      },
+      getLoginStatus () {
+        axios.request({
+          url: "/class/getProgress",
+          params: {
+            q: `<%- uuid %>`
+          }
+        }).then(({ data }) => {
+          if (
+            data &&
+            data.regNo
+          ) {
+            this.isLogin = true
+            this.showQrcode = false
+            this.showReload = false
+            clearInterval(timer)
+          }
+        })
       }
     }
   })

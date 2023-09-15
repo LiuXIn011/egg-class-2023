@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上课进度</title>
+  <!-- echarts -->
+  <script src="https://unpkg.com/echarts@5.4.2/dist/echarts.min.js"></script>
+  <!-- vue组件 -->
+  <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .page-view {
+      width: 300px;
+      overflow: hidden;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 15%;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+    }
+
+    .view-title {
+      font-size: 30px;
+      color: #333;
+      text-align: center;
+    }
+
+    .view-echarts {
+      width: 300px;
+      height: 300px;
+      margin: 30px auto 10px;
+    }
+    .view-status{
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+    .status-success{
+      color: rgba(0, 128, 0, 0.733);
+    }
+    .status-on{
+      color: rgb(180, 48, 15);
+    }
+    .status-stop{
+      color: rgba(179, 167, 9, 0.774);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="page-view">
+    <div class="view-title"><%- data.name %>同学你好</div>
+    <div class="view-echarts" id="echartsView"></div>
+    <p class="view-status">
+      <span>当前刷课状态：</span>
+      <span v-if="<%- data.inClass %>===1" class="status-on">刷课中</span>
+      <span v-if="<%- data.inClass %>===0" class="status-stop">停止刷课</span>
+      <span v-if="<%- data.inClass %>===2" class="status-success">刷课完成</span>
+    </p>
+  </div>
+</body>
+<script>
+  new Vue({
+    el: '#app',
+    data () {
+      return {
+
+      }
+    },
+    created () {
+      const echartsData = [
+        { name: "已经上课", value: "<%- JSON.stringify(data.completeClass) %>" },
+        { name: "上课中", value: "<%- JSON.stringify(data.continueClass) %>" },
+        { name: "未上课", value: "<%- JSON.stringify(data.classLength) %>" },
+      ]
+      const option = {
+        title: {
+          text: '',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          left: 'center'
+        },
+        series: [
+          {
+            name: '',
+            type: 'pie',
+            radius: ['20%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 5,
+              borderColor: '#fff',
+              borderWidth: 5
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: false,
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: echartsData,
+          }
+        ]
+      }
+      this.$nextTick(function () {
+        let myChart = echarts.init(document.getElementById('echartsView'));
+        myChart.setOption(option);
+      })
+    },
+  })
+</script>
+
+</html>
