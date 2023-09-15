@@ -13,4 +13,5 @@ module.exports = app => {
     });
   }
   router.get('/class/start', controller.home.start);
+  router.get('/class/getProgress', controller.donghuaUniversity.getProgress);
 };

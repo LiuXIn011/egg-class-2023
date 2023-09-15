@@ -7,8 +7,12 @@ class DonghuaUniversityService extends Service {
       }
     });
     if (currentData) {
+      if (currentData.inClass !== 0) {
+        // 正在上课中  或已完成
+        return false;
+      }
+      currentData.id = data.id;
       currentData.name = data.name;
-      currentData.regNo = data.regNo;
       currentData.address = data.address;
       currentData.birthday = data.birthday;
       currentData.cardNo = data.cardNo;
@@ -43,6 +47,30 @@ class DonghuaUniversityService extends Service {
     currentData.classLength = data.classLength;
     currentData.save();
     return currentData;
+  }
+  async setInClass({
+    regNo,
+    inClass
+  }) {
+    const currentData = await this.ctx.model.DonghuaUniversity.findOne({
+      where: {
+        regNo
+      }
+    });
+    if (currentData) {
+      currentData.inClass = inClass;
+      currentData.save();
+      return currentData;
+    }
+    return false;
+  }
+  async getProgress(id) {
+    return await this.ctx.model.DonghuaUniversity.findOne({
+      where: {
+        id
+      },
+      attributes: [ 'regNo', 'name', 'completeClass', 'continueClass', 'classLength', 'inClass' ]
+    });
   }
 }
 module.exports = DonghuaUniversityService;

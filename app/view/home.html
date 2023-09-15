@@ -21,6 +21,9 @@
       right: 0;
       top: 15%;
       margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
     }
 
     .view-title {
@@ -61,7 +64,13 @@
       background: -moz-linear-gradient(top, #fece34, #d8a605);
       background: linear-gradient(top, #fece34, #d8a605);
     }
-
+    .view-link{
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 16px;
+    }
     .view-tips {
       font-size: 12px;
       line-height: 14px;
@@ -77,7 +86,8 @@
     <p class="view-title">微信扫码登录</p>
     <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
     <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
-    <button v-else class="view-btn" @click="reload">重新获取</button>
+    <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
+    <a class="view-link" href="/class/getProgress?q=<%- uuid %>">进度查询链接</a>
     <span v-if="showQrcode" class="view-tips">
       1、请使用学习平台绑定的微信扫码登录。
     </span>
@@ -104,6 +114,7 @@
     data () {
       return {
         remainder: 100,
+        showReload: false,
         showQrcode: true
       }
     },
@@ -113,6 +124,7 @@
         if (this.remainder <= 0) {
           clearInterval(timer)
           this.showQrcode = false
+          this.showReload = true
         }
       }, 1000)
     },

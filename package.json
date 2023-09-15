@@ -17,7 +17,8 @@
     "egg-validate": "^2.0.2",
     "egg-view-ejs": "^3.0.0",
     "mysql2": "^3.6.1",
-    "selenium-webdriver": "^4.12.0"
+    "selenium-webdriver": "^4.12.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "egg-bin": "^5",

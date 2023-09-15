@@ -5,25 +5,26 @@ module.exports = app => {
   const DataTypes = app.Sequelize;
 
   const Model = app.model.define('donghuaUniversity', {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    regNo: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: 'reg_no',
       primaryKey: true,
-      autoIncrement: true,
+      comment: '学号'
+    },
+    id: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      // primaryKey: true,
+      // autoIncrement: true,
       field: 'id',
-      comment: 'id'
+      comment: '刷课进程id'
     },
     name: {
       type: DataTypes.STRING(255),
       allowNull: false,
       field: 'name',
       comment: '姓名'
-    },
-    regNo: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      field: 'regNo',
-      comment: '学号'
     },
     address: {
       type: DataTypes.STRING(255),
@@ -40,13 +41,13 @@ module.exports = app => {
     cardNo: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      field: 'cardNo',
+      field: 'card_no',
       comment: '证件号'
     },
     cardType: {
       type: DataTypes.STRING(255),
       allowNull: true,
-      field: 'cardType',
+      field: 'card_type',
       comment: '证件类型'
     },
     email: {
@@ -135,6 +136,13 @@ module.exports = app => {
       defaultValue: 0,
       field: 'class_length',
       comment: '没有学过视频数量'
+    },
+    inClass: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      field: 'in_class',
+      comment: '是否正在上课   1进行中  0停止 2完成'
     },
     createdAt: {
       type: DataTypes.DATE,
