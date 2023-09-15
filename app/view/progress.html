@@ -49,10 +49,18 @@
       color: rgba(0, 128, 0, 0.733);
     }
     .status-on{
-      color: rgb(180, 48, 15);
+      color: rgb(24, 98, 182);
     }
     .status-stop{
-      color: rgba(179, 167, 9, 0.774);
+      color: rgb(180, 48, 15);
+    }
+    .view-tips {
+      font-size: 12px;
+      line-height: 14px;
+      color: #999;
+      display: block;
+      margin-bottom: 10px;
+      text-align: center;
     }
   </style>
 </head>
@@ -67,6 +75,9 @@
       <span v-if="<%- data.inClass %>===0" class="status-stop">停止刷课</span>
       <span v-if="<%- data.inClass %>===2" class="status-success">刷课完成</span>
     </p>
+    <span class="view-tips">
+      如果长时间停止刷课，可重新登录重试。
+    </span>
   </div>
 </body>
 <script>
@@ -80,7 +91,7 @@
     created () {
       const echartsData = [
         { name: "已经上课", value: "<%- JSON.stringify(data.completeClass) %>" },
-        { name: "上课中", value: "<%- JSON.stringify(data.continueClass) %>" },
+        // { name: "上课中", value: "<%- JSON.stringify(data.continueClass) %>" },
         { name: "未上课", value: "<%- JSON.stringify(data.classLength) %>" },
       ]
       const option = {

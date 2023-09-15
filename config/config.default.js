@@ -20,7 +20,8 @@ module.exports = appInfo => {
 
   // add your user config here
   const userConfig = {
-    // myAppName: 'egg',
+    mailName: '2498553107@qq.com',
+    mailPassword: 'snraqvtjzzeqeaac'
   };
   // 数据库配置
   config.sequelize = {

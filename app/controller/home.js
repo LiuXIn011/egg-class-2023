@@ -27,7 +27,7 @@ class HomeController extends Controller {
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
-      // .usingServer('http://192.168.186.130:3000/webdriver')
+      .usingServer('http://192.168.186.130:9515/wd/hub')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
@@ -56,7 +56,7 @@ class HomeController extends Controller {
     // 获取用户信息
     let userInfo = {};
     try {
-    // 登录成功
+      // 登录成功
       await driver.wait(webdriver.until.elementLocated(By.className('log-out')), 120000);
       ctx.logger.info('登录成功');
       // 获取student-access-token
@@ -273,6 +273,14 @@ class HomeController extends Controller {
         await ctx.service.donghuaUniversity.updateClassLength(studentData);
         // 开始上课
         await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length - 1}`
+          );
+        }
       }
     } catch (error) {
       ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询出错`);
@@ -298,6 +306,14 @@ class HomeController extends Controller {
           inClass: 2
         });
         ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程全部结束，停止巡查，感谢使用！`);
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `${userInfo.name}你好！刷课任务已完成，详情可去学习平台查看。`
+          );
+        }
         return;
       }
       // 分割数据
@@ -312,6 +328,8 @@ class HomeController extends Controller {
       await driver.switchTo().window(allWindowHandles[allWindowHandles.length - 1]);
       ctx.logger.info(`${userInfo.regNo}${userInfo.name}:等待视频加载`);
       await driver.sleep(3000);
+      // 等待视频出现
+      await driver.wait(webdriver.until.elementLocated(By.css('#vjs_video_3_html5_api')), 10000);
       // 设置静音
       await driver.executeScript('document.querySelector("#vjs_video_3_html5_api").volume=0');
       // 设置自动循环播放
