@@ -80,30 +80,36 @@
 </head>
 
 <body>
-  <div class="qr-view" id="app">
-    <p class="view-title">{{isLogin?'登录成功':'微信扫码登录'}}</p>
-    <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
-    <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
-    <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
-    <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a>
-    <span v-if="showQrcode" class="view-tips">
-      1、请使用学习平台绑定的微信扫码登录。
-    </span>
-    <span v-if="showQrcode" class="view-tips">
-      2、请在2分钟内完成登录。
-    </span>
-    <span v-if="showQrcode" class="view-tips">
-      3、登录完成后自动开始刷课。无需其他操作。
-    </span>
-    <span v-if="showQrcode" class="view-tips">
-      4、开始刷课后会有邮件通知，如未收到请联系作者。
-    </span>
-    <span v-if="showQrcode" class="view-tips">
-      5、收到通知后关闭此页面即可。
-    </span>
-    <span v-if="showQrcode" class="view-tips">
-      6、刷课大概需要2天时间，完成后会收到邮件通知。
-    </span>
+  <div v-else class="qr-view" id="app">
+    <div v-if="memoryOverload">
+      <p class="view-title">系统繁忙</p>
+      <p class="view-time">当前刷课人数较多，请稍后刷新重试！</p>
+    </div>
+    <div v-else>
+      <p class="view-title">{{isLogin?'登录成功':'微信扫码登录'}}</p>
+      <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
+      <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
+      <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
+      <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a>
+      <span v-if="showQrcode" class="view-tips">
+        1、请使用学习平台绑定的微信扫码登录。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        2、请在2分钟内完成登录。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        3、登录完成后自动开始刷课。无需其他操作。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        4、开始刷课后会有邮件通知，如未收到请联系作者。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        5、收到通知后关闭此页面即可。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        6、刷课大概需要2天时间，完成后会收到邮件通知。
+      </span>
+    </div>
   </div>
 </body>
 <script>
@@ -113,6 +119,7 @@
       return {
         remainder: 100,
         showReload: false,
+        memoryOverload: false,
         isLogin: false,
         showQrcode: true,
         timer: ''
@@ -121,7 +128,10 @@
     created () {
       timer = setInterval(() => {
         this.remainder--
-        this.getLoginStatus()
+        // 每2秒获取一次信息
+        if ((this.remainder % 2) === 0) {
+          this.getLoginStatus()
+        }
         if (this.remainder <= 0) {
           clearInterval(timer)
           this.showQrcode = false
@@ -140,14 +150,19 @@
             q: `<%- uuid %>`
           }
         }).then(({ data }) => {
-          if (
-            data &&
-            data.regNo
-          ) {
-            this.isLogin = true
-            this.showQrcode = false
-            this.showReload = false
-            clearInterval(timer)
+          if (data) {
+            if (data.status == 99) {
+              this.memoryOverload = true
+              this.showQrcode = false
+              this.showReload = false
+              clearInterval(timer)
+              return
+            } else if (data.regNo) {
+              this.isLogin = true
+              this.showQrcode = false
+              this.showReload = false
+              clearInterval(timer)
+            }
           }
         })
       }

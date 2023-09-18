@@ -7,8 +7,13 @@ class DonghuaUniversityService extends Service {
       }
     });
     if (currentData) {
-      if (currentData.inClass !== 0) {
+      if (
+        currentData.status === 1 ||
+        currentData.status === 2
+      ) {
         // 正在上课中  或已完成
+        currentData.id = data.id;
+        currentData.save();
         return false;
       }
       currentData.id = data.id;
@@ -50,7 +55,7 @@ class DonghuaUniversityService extends Service {
   }
   async setInClass({
     regNo,
-    inClass
+    status
   }) {
     const currentData = await this.ctx.model.DonghuaUniversity.findOne({
       where: {
@@ -58,7 +63,7 @@ class DonghuaUniversityService extends Service {
       }
     });
     if (currentData) {
-      currentData.inClass = inClass;
+      currentData.status = status;
       currentData.save();
       return currentData;
     }
@@ -69,7 +74,7 @@ class DonghuaUniversityService extends Service {
       where: {
         id
       },
-      attributes: [ 'regNo', 'name', 'completeClass', 'continueClass', 'classLength', 'inClass' ]
+      attributes: [ 'regNo', 'name', 'completeClass', 'continueClass', 'classLength', 'status' ]
     });
   }
 }

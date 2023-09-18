@@ -15,8 +15,6 @@ module.exports = app => {
     id: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      // primaryKey: true,
-      // autoIncrement: true,
       field: 'id',
       comment: '刷课进程id'
     },
@@ -137,12 +135,12 @@ module.exports = app => {
       field: 'class_length',
       comment: '没有学过视频数量'
     },
-    inClass: {
+    status: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
-      field: 'in_class',
-      comment: '是否正在上课   1进行中  0停止 2完成'
+      field: 'status',
+      comment: '是否正在上课   1进行中  0停止 2完成 99内存过载'
     },
     createdAt: {
       type: DataTypes.DATE,

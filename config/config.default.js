@@ -28,7 +28,7 @@ module.exports = appInfo => {
     dialect: 'mysql',
     port: 3306,
     timezone: '+08:00',
-    database: 'test',
+    database: 'my_db',
     host: '8.130.92.178',
     username: 'root',
     password: 'liuxin0128'

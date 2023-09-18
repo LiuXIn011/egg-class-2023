@@ -9,37 +9,43 @@ require('chromedriver');
 const axios = require('axios');
 // 引入uuid模块
 const { v4 } = require('uuid');
+// 引入os模块
+const os = require('os');
 
 const { Controller } = require('egg');
 
 class HomeController extends Controller {
   async start() {
-    const { ctx } = this;
+    const { ctx, config } = this;
     ctx.logger.info('开始处理');
+    // 生成uuid
     const uuid = v4();
     ctx.logger.info(`生成uuid:${uuid}`);
     // 实例化selenium
     const chromeData = new chrome.Options();
+    // selenium配置
     chromeData.addArguments('--no-sandbox');
-    chromeData.addArguments('--headless'); // 不打开浏览器运行;
-    chromeData.addArguments('--disable-gpu');
+    chromeData.excludeSwitches([ 'enable-logging' ]); // 不加载日志
+    if (config.env === 'prod') {
+      chromeData.addArguments('--headless'); // 不打开浏览器运行;
+    }
+    chromeData.addArguments('--disable-gpu'); // 禁用GPU
     const By = webdriver.By;
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
-      // .usingServer('http://192.168.186.130:9515/wd/hub')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
       // 点击显示二维码
       await driver.wait(webdriver.until.elementLocated(By.css('.extra>button')), 10000).click();
       // 进入iframe
-      console.log('进入iframe');
+      ctx.logger.info('进入iframe');
       const iframe = await driver.wait(webdriver.until.elementLocated(By.css('iframe')), 10000);
       await driver.switchTo().frame(iframe);
       driver.sleep(3000);
       // 获取路径
-      console.log('获取路径');
+      ctx.logger.info('获取路径');
       const qrcodePath = await driver.wait(webdriver.until.elementLocated(By.css('.wrp_code>img')), 10000).getAttribute('src');
       const render = ctx.render('home.html', { qrcodePath, uuid });
       // 获取token
@@ -71,10 +77,25 @@ class HomeController extends Controller {
         if (data.responseCode === 'SUCCESS') {
           userInfo = data.infoData;
           userInfo.id = uuid;
+          // 计算内存
+          const freememPercentage = os.freemem() / os.totalmem();
+          ctx.logger.info(`内存剩余：${Math.floor(freememPercentage * 10000) / 100}%`);
+          if (freememPercentage < 0.1) {
+            ctx.logger.error('内存过载');
+            userInfo.status = 99;
+          } else {
+            userInfo.status = 0;
+          }
           // 是否正在刷课
           const isInclassFlag = await ctx.service.donghuaUniversity.create(userInfo);
           if (!isInclassFlag) {
             // 正在刷课不继续走下去
+            ctx.logger.info(`${userInfo.regNo}${userInfo.name}:正在刷课！`);
+            return;
+          }
+          // 内存过载
+          if (userInfo.status === 99) {
+            await driver.quit();
             return;
           }
           await this.getClassList(driver, By, userInfo, studentAccessToken);
@@ -83,7 +104,6 @@ class HomeController extends Controller {
           await driver.quit();
         }
       });
-
     } catch (error) {
       ctx.logger.error('登录失败');
       ctx.logger.error(error);
@@ -115,14 +135,13 @@ class HomeController extends Controller {
           ctx.logger.info(allClassUrl);
           // 打开页面 获取上课信息
           await this.openPage(0, allClassUrl, driver, By, 0, 0, [], 0, userInfo);
-
         } else {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：${data.message}`);
           await driver.quit();
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            inClass: 0
+            status: 0
           });
         }
       }).catch(async err => {
@@ -132,7 +151,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          inClass: 0
+          status: 0
         });
       });
     } catch (error) {
@@ -142,7 +161,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        inClass: 0
+        status: 0
       });
     }
   }
@@ -184,7 +203,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          inClass: 0
+          status: 0
         });
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:未正常获取资源id`);
         ctx.logger.info(error);
@@ -234,7 +253,7 @@ class HomeController extends Controller {
           await driver.quit();
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            inClass: 0
+            status: 0
           });
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:${data.message}`);
         }
@@ -245,7 +264,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          inClass: 0
+          status: 0
         });
       });
 
@@ -289,7 +308,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        inClass: 0
+        status: 0
       });
     }
   }
@@ -303,7 +322,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          inClass: 2
+          status: 2
         });
         ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程全部结束，停止巡查，感谢使用！`);
         // 发送邮件通知
@@ -324,8 +343,13 @@ class HomeController extends Controller {
       await driver.executeScript(`window.open('${currentClass.classPath}','_blank');`);
       // 所有窗口handel
       const allWindowHandles = await driver.getAllWindowHandles();
+      // 当前窗口handel
+      const currentWindowHandle = allWindowHandles[allWindowHandles.length - 1];
+      // 关闭其他窗口
+      await driver.switchTo().window(allWindowHandles[0]);
+      await driver.close();
       // 切换最新窗口
-      await driver.switchTo().window(allWindowHandles[allWindowHandles.length - 1]);
+      await driver.switchTo().window(currentWindowHandle);
       ctx.logger.info(`${userInfo.regNo}${userInfo.name}:等待视频加载`);
       await driver.sleep(3000);
       // 等待视频出现
@@ -333,7 +357,7 @@ class HomeController extends Controller {
       // 设置静音
       await driver.executeScript('document.querySelector("#vjs_video_3_html5_api").volume=0');
       // 设置自动循环播放
-      // await driver.executeScript(`document.querySelector("#vjs_video_3_html5_api").setAttribute("loop","")`)
+      await driver.executeScript('document.querySelector("#vjs_video_3_html5_api").setAttribute("loop","")');
       ctx.logger.info(`${userInfo.regNo}${userInfo.name}:开始播放`);
       await driver.wait(webdriver.until.elementLocated(By.css('.pv-controls-left>button')), 10000).click();
       // 点击二倍速
@@ -343,7 +367,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        inClass: 1
+        status: 1
       });
       // 运行巡查程序
       await this.inspectionClass(currentClass, driver, By, noStudyClassInfo, studentData, userInfo);
@@ -354,7 +378,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        inClass: 0
+        status: 0
       });
     }
   }
@@ -427,7 +451,7 @@ class HomeController extends Controller {
             // 设置刷课状态
             await ctx.service.donghuaUniversity.setInClass({
               regNo: userInfo.regNo,
-              inClass: 0
+              status: 0
             });
           }
         }).catch(async err => {
@@ -437,7 +461,7 @@ class HomeController extends Controller {
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            inClass: 0
+            status: 0
           });
         });
       } catch (err) {
@@ -448,7 +472,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          inClass: 0
+          status: 0
         });
       }
     }, 60000);

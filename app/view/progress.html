@@ -59,7 +59,7 @@
       line-height: 14px;
       color: #999;
       display: block;
-      margin-bottom: 10px;
+      margin-top: 10px;
       text-align: center;
     }
   </style>
@@ -71,12 +71,15 @@
     <div class="view-echarts" id="echartsView"></div>
     <p class="view-status">
       <span>当前刷课状态：</span>
-      <span v-if="<%- data.inClass %>===1" class="status-on">刷课中</span>
-      <span v-if="<%- data.inClass %>===0" class="status-stop">停止刷课</span>
-      <span v-if="<%- data.inClass %>===2" class="status-success">刷课完成</span>
+      <span v-if="<%- data.status %>===1" class="status-on">刷课中</span>
+      <span v-if="<%- data.status %>===0" class="status-stop">停止刷课</span>
+      <span v-if="<%- data.status %>===2" class="status-success">刷课完成</span>
     </p>
     <span class="view-tips">
       如果长时间停止刷课，可重新登录重试。
+    </span>
+    <span class="view-tips">
+      如果长时间进度未更新，请联系管理员。
     </span>
   </div>
 </body>
