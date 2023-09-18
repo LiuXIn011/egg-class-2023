@@ -297,7 +297,10 @@ class HomeController extends Controller {
           await ctx.service.tools.sendMail(
             userInfo.email,
             '刷课提醒',
-            `${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length - 1}`
+            `
+              <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length - 1}</p>
+              <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
+            `
           );
         }
       }

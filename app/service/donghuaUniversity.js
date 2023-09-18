@@ -74,7 +74,7 @@ class DonghuaUniversityService extends Service {
       where: {
         id
       },
-      attributes: [ 'regNo', 'name', 'completeClass', 'continueClass', 'classLength', 'status' ]
+      attributes: [ 'regNo', 'name', 'email', 'completeClass', 'continueClass', 'classLength', 'status' ]
     });
   }
 }

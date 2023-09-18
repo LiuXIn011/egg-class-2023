@@ -34,7 +34,7 @@
       text-align: center;
     }
 
-    .view-time {
+    .view-danger-text {
       font-size: 14px;
       color: red;
       text-align: center;
@@ -83,14 +83,23 @@
   <div v-else class="qr-view" id="app">
     <div v-if="memoryOverload">
       <p class="view-title">系统繁忙</p>
-      <p class="view-time">当前刷课人数较多，请稍后刷新重试！</p>
+      <p class="view-danger-text">当前刷课人数较多，请稍后刷新重试！</p>
     </div>
     <div v-else>
       <p class="view-title">{{isLogin?'登录成功':'微信扫码登录'}}</p>
-      <p v-if="showQrcode" class="view-time">请在{{remainder}}秒内登录完成</p>
+      <p v-if="showQrcode" class="view-danger-text">请在{{remainder}}秒内登录完成</p>
       <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
       <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
-      <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a>
+      <!-- <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a> -->
+      <span v-if="isLogin && !email" class="view-danger-text">
+        请前往学习平台配置电子邮件地址！
+      </span>
+      <span v-if="isLogin && !email" class="view-danger-text">
+        配置完成后重新扫码登录即可查询刷课进度。
+      </span>
+      <span v-if="isLogin && email" class="view-danger-text">
+        刷课进度将发送到邮件：{{email}}
+      </span>
       <span v-if="showQrcode" class="view-tips">
         1、请使用学习平台绑定的微信扫码登录。
       </span>
@@ -122,7 +131,8 @@
         memoryOverload: false,
         isLogin: false,
         showQrcode: true,
-        timer: ''
+        timer: '',
+        email: '',
       }
     },
     created () {
@@ -161,6 +171,7 @@
               this.isLogin = true
               this.showQrcode = false
               this.showReload = false
+              this.email = data.email
               clearInterval(timer)
             }
           }
