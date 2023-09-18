@@ -21,13 +21,13 @@ class HomeController extends Controller {
     // 实例化selenium
     const chromeData = new chrome.Options();
     chromeData.addArguments('--no-sandbox');
-    // chromeData.addArguments('--headless'); // 不打开浏览器运行;
+    chromeData.addArguments('--headless'); // 不打开浏览器运行;
     chromeData.addArguments('--disable-gpu');
     const By = webdriver.By;
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
-      .usingServer('http://192.168.186.130:9515/wd/hub')
+      // .usingServer('http://192.168.186.130:9515/wd/hub')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
