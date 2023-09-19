@@ -141,7 +141,7 @@ class HomeController extends Controller {
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            status: 0
+            status: 3
           });
         }
       }).catch(async err => {
@@ -151,7 +151,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          status: 0
+          status: 3
         });
       });
     } catch (error) {
@@ -161,7 +161,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        status: 0
+        status: 3
       });
     }
   }
@@ -203,7 +203,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          status: 0
+          status: 3
         });
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:未正常获取资源id`);
         ctx.logger.info(error);
@@ -253,7 +253,7 @@ class HomeController extends Controller {
           await driver.quit();
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            status: 0
+            status: 3
           });
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:${data.message}`);
         }
@@ -264,7 +264,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          status: 0
+          status: 3
         });
       });
 
@@ -311,7 +311,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        status: 0
+        status: 3
       });
     }
   }
@@ -381,7 +381,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
-        status: 0
+        status: 3
       });
     }
   }
@@ -438,8 +438,14 @@ class HomeController extends Controller {
                     studentData.continueClass = 1;
                   }
                   await ctx.service.donghuaUniversity.updateClassLength(studentData);
-                  // 继续上课
-                  await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
+                  // 检测暂停状态
+                  const studentStatus = await ctx.service.donghuaUniversity.getStatusByRegNo(userInfo.regNo);
+                  if (studentStatus === 4) {
+                    ctx.logger.info(`${userInfo.regNo}${userInfo.name}:检测到暂停状态，停止上课！`);
+                  } else {
+                    // 继续上课
+                    await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
+                  }
                 } else {
                   // 未结束
                   ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：进行中`);
@@ -454,7 +460,7 @@ class HomeController extends Controller {
             // 设置刷课状态
             await ctx.service.donghuaUniversity.setInClass({
               regNo: userInfo.regNo,
-              status: 0
+              status: 3
             });
           }
         }).catch(async err => {
@@ -464,7 +470,7 @@ class HomeController extends Controller {
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
-            status: 0
+            status: 3
           });
         });
       } catch (err) {
@@ -475,7 +481,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
-          status: 0
+          status: 3
         });
       }
     }, 60000);

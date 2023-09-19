@@ -140,7 +140,7 @@ module.exports = app => {
       allowNull: true,
       defaultValue: 0,
       field: 'status',
-      comment: '是否正在上课   1进行中  0停止 2完成 99内存过载'
+      comment: '是否正在上课 0未开始 1进行中  2完成 3出错暂停 4停止上课 99内存过载'
     },
     createdAt: {
       type: DataTypes.DATE,

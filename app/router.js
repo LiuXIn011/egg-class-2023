@@ -15,4 +15,7 @@ module.exports = app => {
   router.get('/class/start', controller.home.start);
   router.get('/class/getProgress', controller.donghuaUniversity.getProgress);
   router.get('/class/getProgressView', controller.donghuaUniversity.getProgressView);
+  router.get('/class/getUserList', controller.donghuaUniversity.getUserList);
+  router.post('/api/class/updateStatusByRegNo', controller.donghuaUniversity.updateStatusByRegNo);
+  router.post('/api/class/sendMessage', controller.donghuaUniversity.sendMessage);
 };

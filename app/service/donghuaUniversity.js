@@ -77,5 +77,28 @@ class DonghuaUniversityService extends Service {
       attributes: [ 'regNo', 'name', 'email', 'completeClass', 'continueClass', 'classLength', 'status' ]
     });
   }
+  async getStatusByRegNo(regNo) {
+    return await this.ctx.model.DonghuaUniversity.findOne({
+      where: {
+        regNo
+      },
+      attributes: [ 'regNo', 'name', 'status' ]
+    });
+  }
+  async getList() {
+    return await this.ctx.model.DonghuaUniversity.findAndCountAll({
+      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status' ]
+    });
+  }
+  async updateStatusByRegNo({ regNo, status }) {
+    const currentData = await this.ctx.model.DonghuaUniversity.findOne({
+      where: {
+        regNo
+      }
+    });
+    currentData.status = status;
+    currentData.save();
+    return currentData;
+  }
 }
 module.exports = DonghuaUniversityService;
