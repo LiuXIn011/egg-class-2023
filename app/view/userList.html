@@ -59,7 +59,7 @@
           <el-tag v-if="row.status==99" type="warning">内存过载</el-tag>
         </el-table-column>
         <el-table-column align="center" #default="{row}" label="操作">
-          <el-button type="danger" size="small" @click="stop(row.regNo)">停止上课</el-button>
+          <el-button v-if="row.status==1" type="danger" size="small" @click="stop(row.regNo)">停止上课</el-button>
         </el-table-column>
       </el-table>
     </el-card>
