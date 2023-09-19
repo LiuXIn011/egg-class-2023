@@ -63,7 +63,7 @@ class HomeController extends Controller {
     let userInfo = {};
     try {
       // 登录成功
-      await driver.wait(webdriver.until.elementLocated(By.className('log-out')), 120000);
+      await driver.wait(webdriver.until.elementLocated(By.css('.log-out')), 120000);
       ctx.logger.info('登录成功');
       // 获取student-access-token
       const studentAccessToken = (await driver.manage().getCookie('student-access-token')).value;
@@ -298,7 +298,7 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-              <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length - 1}</p>
+              <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length}</p>
               <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
             `
           );
@@ -440,8 +440,9 @@ class HomeController extends Controller {
                   await ctx.service.donghuaUniversity.updateClassLength(studentData);
                   // 检测暂停状态
                   const studentStatus = await ctx.service.donghuaUniversity.getStatusByRegNo(userInfo.regNo);
-                  if (studentStatus === 4) {
+                  if (studentStatus.status === 4) {
                     ctx.logger.info(`${userInfo.regNo}${userInfo.name}:检测到暂停状态，停止上课！`);
+                    await driver.quit();
                   } else {
                     // 继续上课
                     await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);

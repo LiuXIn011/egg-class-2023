@@ -98,7 +98,7 @@
         配置完成后重新扫码登录即可查询刷课进度。
       </span>
       <span v-if="isLogin && email" class="view-danger-text">
-        刷课进度将发送到邮件：{{email}}
+        进度将发送到：{{email}}
       </span>
       <span v-if="showQrcode" class="view-tips">
         1、请使用学习平台绑定的微信扫码登录。
@@ -117,6 +117,9 @@
       </span>
       <span v-if="showQrcode" class="view-tips">
         6、刷课大概需要2天时间，完成后会收到邮件通知。
+      </span>
+      <span v-if="showQrcode" class="view-tips">
+        6、管理员QQ：452356248。
       </span>
     </div>
   </div>

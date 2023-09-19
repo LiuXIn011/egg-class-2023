@@ -9,6 +9,8 @@
   <script src="https://unpkg.com/echarts@5.4.2/dist/echarts.min.js"></script>
   <!-- vue组件 -->
   <script src="https://unpkg.com/vue@2.6.10/dist/vue.js"></script>
+  <!-- axios -->
+  <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -39,21 +41,26 @@
       height: 300px;
       margin: 30px auto 10px;
     }
-    .view-status{
+
+    .view-status {
       width: 100%;
       text-align: center;
       font-size: 14px;
       color: #666;
     }
-    .status-success{
-      color: rgba(0, 128, 0, 0.733);
+
+    .status-success {
+      color: #67C23A;
     }
-    .status-on{
-      color: rgb(24, 98, 182);
+
+    .status-on {
+      color: #409EFF;
     }
-    .status-stop{
-      color: rgb(180, 48, 15);
+
+    .status-stop {
+      color: #F56C6C;
     }
+
     .view-tips {
       font-size: 12px;
       line-height: 14px;
@@ -61,6 +68,15 @@
       display: block;
       margin-top: 10px;
       text-align: center;
+    }
+
+    .view-danger-text {
+      font-size: 14px;
+      color: #F56C6C;
+      text-align: center;
+      margin-top: 20px;
+      text-decoration: underline;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -71,9 +87,11 @@
     <div class="view-echarts" id="echartsView"></div>
     <p class="view-status">
       <span>当前刷课状态：</span>
-      <span v-if="<%- data.status %>===1" class="status-on">刷课中</span>
       <span v-if="<%- data.status %>===0" class="status-stop">停止刷课</span>
+      <span v-if="<%- data.status %>===1" class="status-on">刷课中</span>
       <span v-if="<%- data.status %>===2" class="status-success">刷课完成</span>
+      <span v-if="<%- data.status %>===3" class="status-stop">出错暂停</span>
+      <span v-if="<%- data.status %>===4" class="status-stop">停止上课</span>
     </p>
     <span class="view-tips">
       如果长时间停止刷课，可重新登录重试。
@@ -81,6 +99,10 @@
     <span class="view-tips">
       如果长时间进度未更新，请联系管理员。
     </span>
+    <span class="view-tips">
+      管理员QQ：452356248
+    </span>
+    <p v-if="<%- data.status %>===1" class="view-danger-text" @click="stop">停止上课</p>
   </div>
 </body>
 <script>
@@ -93,9 +115,9 @@
     },
     created () {
       const echartsData = [
-        { name: "已经上课", value: "<%- JSON.stringify(data.completeClass) %>" },
+        { name: "未上课", value: "<%- JSON.stringify(data.classLength) %>", itemStyle: { color: "#F56C6C" } },
+        { name: "已经上课", value: "<%- JSON.stringify(data.completeClass) %>", itemStyle: { color: "#67C23A" } },
         // { name: "上课中", value: "<%- JSON.stringify(data.continueClass) %>" },
-        { name: "未上课", value: "<%- JSON.stringify(data.classLength) %>" },
       ]
       const option = {
         title: {
@@ -140,6 +162,31 @@
         myChart.setOption(option);
       })
     },
+    methods: {
+      stop () {
+        const regNo =<%- JSON.stringify(data.regNo) %>;
+        let flag = confirm("此操作将停止上课, 是否继续?");
+        if (flag) {
+          axios.request({
+            url: "/api/class/updateStatusByRegNo",
+            method: "post",
+            data: {
+              regNo,
+              status: 4
+            }
+          }).then(({ data }) => {
+            if (data) {
+              alert('操作成功！')
+              window.location.reload()
+            } else {
+              alert('操作失败！')
+            }
+          }).catch(() => {
+            alert('操作失败！')
+          })
+        }
+      }
+    }
   })
 </script>
 
