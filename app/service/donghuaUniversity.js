@@ -86,7 +86,14 @@ class DonghuaUniversityService extends Service {
     });
   }
   async getList() {
-    return await this.ctx.model.DonghuaUniversity.findAndCountAll({
+    const { app, ctx } = this;
+    const Op = app.Sequelize.Op;
+    return await ctx.model.DonghuaUniversity.findAndCountAll({
+      where: {
+        status: {
+          [Op.ne]: 5
+        }
+      },
       attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status' ]
     });
   }
@@ -99,6 +106,13 @@ class DonghuaUniversityService extends Service {
     currentData.status = status;
     currentData.save();
     return currentData;
+  }
+  async removeById(id) {
+    return await this.ctx.model.DonghuaUniversity.destroy({
+      where: {
+        id
+      }
+    });
   }
 }
 module.exports = DonghuaUniversityService;

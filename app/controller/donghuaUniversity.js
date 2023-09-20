@@ -51,5 +51,15 @@ class DHController extends Controller {
     );
     ctx.body = 'success';
   }
+  async removeById() {
+    const { ctx } = this;
+    const data = ctx.query;
+    const rules = {
+      q: 'string'
+    };
+    ctx.validate(rules, data);
+    await ctx.service.donghuaUniversity.removeById(data.q);
+    ctx.body = 'success';
+  }
 }
 module.exports = DHController;

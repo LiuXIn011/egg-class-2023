@@ -18,4 +18,5 @@ module.exports = app => {
   router.get('/class/getUserListXxxs', controller.donghuaUniversity.getUserList);
   router.post('/api/class/updateStatusByRegNo', controller.donghuaUniversity.updateStatusByRegNo);
   router.post('/api/class/sendMessage', controller.donghuaUniversity.sendMessage);
+  router.get('/api/class/removeById', controller.donghuaUniversity.removeById);
 };

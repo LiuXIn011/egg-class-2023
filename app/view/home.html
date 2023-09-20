@@ -80,10 +80,14 @@
 </head>
 
 <body>
-  <div v-else class="qr-view" id="app">
+  <div class="qr-view" id="app">
     <div v-if="memoryOverload">
       <p class="view-title">系统繁忙</p>
       <p class="view-danger-text">当前刷课人数较多，请稍后刷新重试！</p>
+    </div>
+    <div v-else-if="noBindWx">
+      <p class="view-title">未绑定的微信</p>
+      <p class="view-danger-text">请前往学习平台确认绑定微信信息</p>
     </div>
     <div v-else>
       <p class="view-title">{{isLogin?'登录成功':'微信扫码登录'}}</p>
@@ -132,6 +136,7 @@
         remainder: 100,
         showReload: false,
         memoryOverload: false,
+        noBindWx: false,
         isLogin: false,
         showQrcode: true,
         timer: '',
@@ -164,19 +169,40 @@
           }
         }).then(({ data }) => {
           if (data) {
+            // 内存过载
             if (data.status == 99) {
               this.memoryOverload = true
               this.showQrcode = false
               this.showReload = false
               clearInterval(timer)
               return
-            } else if (data.regNo) {
+            } else if (data.status == 5) {
+              // 未绑定的微信
+              this.noBindWx = true
+              this.showQrcode = false
+              this.showReload = false
+              clearInterval(timer)
+              this.removeErrorData()
+              return
+            } else if (
+              data.regNo &&
+              !data.regNo.includes('error')
+            ) {
+              // 登录成功
               this.isLogin = true
               this.showQrcode = false
               this.showReload = false
               this.email = data.email
               clearInterval(timer)
             }
+          }
+        })
+      },
+      removeErrorData () {
+        axios.request({
+          url: "/api/class/removeById",
+          params: {
+            q: `<%- uuid %>`
           }
         })
       }

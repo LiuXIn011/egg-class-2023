@@ -61,10 +61,32 @@ class HomeController extends Controller {
     const { ctx } = this;
     // 获取用户信息
     let userInfo = {};
+    let getNoWxTimer = '';
+    let isquit = false;
     try {
+      // 校验是否因为没有绑定微信而登陆失败
+      getNoWxTimer = setInterval(async () => {
+        const localUrl = await driver.getCurrentUrl();
+        if (localUrl.includes('/home/wxBind')) {
+          ctx.logger.error('未绑定的微信');
+          clearInterval(getNoWxTimer);
+          await ctx.service.donghuaUniversity.create({
+            id: uuid,
+            name: 'error',
+            regNo: 'error' + uuid,
+            status: 5
+          });
+          if (!isquit) {
+            await driver.quit();
+          }
+          isquit = true;
+        }
+      }, 3000);
       // 登录成功
       await driver.wait(webdriver.until.elementLocated(By.css('.log-out')), 120000);
       ctx.logger.info('登录成功');
+      // 清除绑定微信校验
+      clearInterval(getNoWxTimer);
       // 获取student-access-token
       const studentAccessToken = (await driver.manage().getCookie('student-access-token')).value;
       await axios({
@@ -80,7 +102,7 @@ class HomeController extends Controller {
           // 计算内存
           const freememPercentage = os.freemem() / os.totalmem();
           ctx.logger.info(`内存剩余：${Math.floor(freememPercentage * 10000) / 100}%`);
-          if (freememPercentage < 0.1) {
+          if (freememPercentage < 0.2) {
             ctx.logger.error('内存过载');
             userInfo.status = 99;
           } else {
@@ -95,19 +117,30 @@ class HomeController extends Controller {
           }
           // 内存过载
           if (userInfo.status === 99) {
-            await driver.quit();
+            if (!isquit) {
+              await driver.quit();
+            }
+            isquit = true;
             return;
           }
           await this.getClassList(driver, By, userInfo, studentAccessToken);
         } else {
           ctx.logger.error('获取用户信息失败');
-          await driver.quit();
+          if (!isquit) {
+            await driver.quit();
+          }
+          isquit = true;
         }
       });
     } catch (error) {
+      // 清除绑定微信校验
+      clearInterval(getNoWxTimer);
       ctx.logger.error('登录失败');
       ctx.logger.error(error);
-      await driver.quit();
+      if (!isquit) {
+        await driver.quit();
+      }
+      isquit = true;
     }
   }
   async getClassList(driver, By, userInfo, studentAccessToken) {
