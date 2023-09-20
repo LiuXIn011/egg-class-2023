@@ -28,11 +28,15 @@
   <div id="app">
     <el-card shadow="always">
       <el-row style="margin-bottom: 20px;" type="flex" align="middle" justify="space-between">
-        <h3>人员列表</h3>
-        <el-button type="primary" size="default" @click="sendMessage">发送通知</el-button>
+        <h3>用户列表</h3>
+        <div>
+          <el-button type="primary" size="default" @click="sendMessage">发送通知</el-button>
+          <el-button type="danger" size="default" @click="multipleStop">停止上课</el-button>
+        </div>
       </el-row>
-      <el-table :data="userList" stripe border style="width: 100%">
-        <el-table-column align="center" type="index"></el-table-column>
+      <el-table :data="userList" stripe border style="width: 100%" @selection-change="selectionChange">
+        <el-table-column align="center" type="selection"></el-table-column>
+        <el-table-column align="center" width="60px" type="index" label="序号"></el-table-column>
         <el-table-column align="center" prop="name" #default="{row}" label="姓名">
           <el-row type="flex" align="middle" justify="center">
             <el-image fit="cover" style="width: 60px; height: 60px;border-radius: 50%;"
@@ -59,28 +63,12 @@
           <el-tag v-if="row.status==99" type="warning">内存过载</el-tag>
         </el-table-column>
         <el-table-column align="center" #default="{row}" label="操作">
-          <el-button v-if="row.status==1" type="danger" size="small" @click="stop(row.regNo)">停止上课</el-button>
+          <el-link v-if="row.status==1" type="danger" :underline="false" @click="stop(row.regNo)">停止上课</el-link>
         </el-table-column>
       </el-table>
     </el-card>
     <el-dialog title="发送通知" :visible.sync="sendMessageDialog" width="660px">
       <el-form :model="sendMessageData" ref="form" :rules="rules" label-width="100px" :inline="false">
-        <el-form-item label="接收人：" prop="emailList">
-          <el-select style="width: 100%;" v-model="sendMessageData.emailList" placeholder="请选择" multiple clearable
-            filterable>
-            <el-option v-for="item in userList" :key="item.regNo" :label="item.name" :value="item.email">
-              <el-row style="margin-bottom: 20px;" type="flex" align="middle" justify="space-between">
-                <p>{{item.name}}</p>
-                <el-tag size="mini" v-if="item.status==0" type="info">未开始</el-tag>
-                <el-tag size="mini" v-if="item.status==1">进行中</el-tag>
-                <el-tag size="mini" v-if="item.status==2" type="success">已完成</el-tag>
-                <el-tag size="mini" v-if="item.status==3" type="danger">出错</el-tag>
-                <el-tag size="mini" v-if="item.status==4" type="danger">停止上课</el-tag>
-                <el-tag size="mini" v-if="item.status==99" type="warning">内存过载</el-tag>
-              </el-row>
-            </el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="通知内容：" prop="content">
           <el-input type="textarea" :rows="5" v-model="sendMessageData.content"></el-input>
         </el-form-item>
@@ -99,14 +87,12 @@
       return {
         userList: <%- JSON.stringify(data.rows) %>,
         sendMessageDialog: false,
+        selectionData: [],
         sendMessageData: {
           emailList: [],
           content: ""
         },
         rules: {
-          emailList: [
-            { required: true, message: '请选择', trigger: 'change' }
-          ],
           content: [
             { required: true, message: '请输入', trigger: 'blur' }
           ]
@@ -144,16 +130,63 @@
           });
         });
       },
+      multipleStop () {
+        if (
+          !this.selectionData ||
+          this.selectionData.length === 0
+        ) {
+          this.$message.error("请选择操作对象")
+          return
+        }
+        this.$confirm(`此操作将停止上课, 是否继续?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          axios.request({
+            url: "/api/class/stopByRegNoMultiple",
+            method: "post",
+            data: {
+              regNoList: this.selectionData.map(item => item.regNo),
+              status: 4
+            }
+          }).then(({ data }) => {
+            if (data) {
+              this.$message.success('操作成功！')
+              window.location.reload()
+            } else {
+              this.$message.error('操作失败！')
+            }
+          }).catch(() => {
+            this.$message.error('操作失败！')
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });
+        });
+      },
+      selectionChange (data) {
+        this.selectionData = data || []
+      },
       sendMessage () {
+        if (
+          !this.selectionData ||
+          this.selectionData.length === 0
+        ) {
+          this.$message.error("请选择收件人")
+          return
+        }
         this.sendMessageDialog = true
         this.sendMessageData = {
-          emailList: [],
           content: ""
         }
       },
       sendMessageSave () {
         this.$refs.form.validate((flag) => {
           if (flag) {
+            this.sendMessageData.emailList = this.selectionData.map(item => item.email)
             axios.request({
               url: "/api/class/sendMessage",
               method: "post",

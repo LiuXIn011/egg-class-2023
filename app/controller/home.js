@@ -78,8 +78,8 @@ class HomeController extends Controller {
           });
           if (!isquit) {
             await driver.quit();
+            isquit = true;
           }
-          isquit = true;
         }
       }, 3000);
       // 登录成功
@@ -102,7 +102,7 @@ class HomeController extends Controller {
           // 计算内存
           const freememPercentage = os.freemem() / os.totalmem();
           ctx.logger.info(`内存剩余：${Math.floor(freememPercentage * 10000) / 100}%`);
-          if (freememPercentage < 0.2) {
+          if (freememPercentage < 0.15) {
             ctx.logger.error('内存过载');
             userInfo.status = 99;
           } else {
@@ -119,8 +119,8 @@ class HomeController extends Controller {
           if (userInfo.status === 99) {
             if (!isquit) {
               await driver.quit();
+              isquit = true;
             }
-            isquit = true;
             return;
           }
           await this.getClassList(driver, By, userInfo, studentAccessToken);
@@ -128,8 +128,8 @@ class HomeController extends Controller {
           ctx.logger.error('获取用户信息失败');
           if (!isquit) {
             await driver.quit();
+            isquit = true;
           }
-          isquit = true;
         }
       });
     } catch (error) {
@@ -139,8 +139,8 @@ class HomeController extends Controller {
       ctx.logger.error(error);
       if (!isquit) {
         await driver.quit();
+        isquit = true;
       }
-      isquit = true;
     }
   }
   async getClassList(driver, By, userInfo, studentAccessToken) {

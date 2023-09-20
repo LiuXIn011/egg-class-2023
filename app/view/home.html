@@ -74,7 +74,7 @@
       line-height: 14px;
       color: #999;
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -95,36 +95,30 @@
       <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
       <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
       <!-- <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a> -->
-      <span v-if="isLogin && !email" class="view-danger-text">
+      <p v-if="isLogin && !email" class="view-danger-text">
         请前往学习平台配置电子邮件地址！
-      </span>
-      <span v-if="isLogin && !email" class="view-danger-text">
+      </p>
+      <p v-if="isLogin && !email" class="view-danger-text">
         配置完成后重新扫码登录即可查询刷课进度。
-      </span>
-      <span v-if="isLogin && email" class="view-danger-text">
+      </p>
+      <p v-if="isLogin && email" class="view-danger-text">
         进度将发送到：{{email}}
-      </span>
-      <span v-if="showQrcode" class="view-tips">
+      </p>
+      <p v-if="showQrcode" class="view-tips">
         1、请使用学习平台绑定的微信扫码登录。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        2、请在2分钟内完成登录。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        3、登录完成后自动开始刷课。无需其他操作。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        4、开始刷课后会有邮件通知，如未收到请联系作者。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        5、收到通知后关闭此页面即可。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        6、刷课大概需要2天时间，完成后会收到邮件通知。
-      </span>
-      <span v-if="showQrcode" class="view-tips">
-        6、管理员QQ：452356248。
-      </span>
+      </p>
+      <p v-if="showQrcode" class="view-tips">
+        2、登录完成后自动开始刷课。无需其他操作。
+      </p>
+      <p v-if="showQrcode" class="view-tips">
+        3、开始刷课后会有邮件通知，如未收到请联系作者。
+      </p>
+      <p v-if="showQrcode" class="view-tips">
+        4、刷课大概需要2天时间，完成后会收到邮件通知。
+      </p>
+      <p v-if="showQrcode" class="view-tips">
+        5、管理员QQ：452356248。
+      </p>
     </div>
   </div>
 </body>

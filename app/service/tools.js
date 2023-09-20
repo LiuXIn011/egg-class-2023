@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 });
 class ToolsService extends Service {
   async sendMail(email, subject, html) {
-    console.log(email, subject, html);
     const mailOptions = {
       from: user_email, // 发送者,与上面的user一致
       to: email, // 接收者,可以同时发送多个,以逗号隔开

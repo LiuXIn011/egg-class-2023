@@ -19,7 +19,7 @@ class DHController extends Controller {
     if (data) {
       return ctx.render('progress.html', { data });
     }
-    ctx.body = '未查询到记录，请确认地址是否正确，或稍后刷新重试！';
+    ctx.body = '未查询到记录，请确认地址是否正确！';
   }
   async getUserList() {
     const { ctx } = this;
@@ -34,6 +34,16 @@ class DHController extends Controller {
     };
     ctx.validate(rules, ctx.request.body);
     await ctx.service.donghuaUniversity.updateStatusByRegNo(ctx.request.body);
+    ctx.body = 'success';
+  }
+  async stopByRegNoMultiple() {
+    const { ctx } = this;
+    const rules = {
+      regNoList: 'array',
+      status: 'number'
+    };
+    ctx.validate(rules, ctx.request.body);
+    await ctx.service.donghuaUniversity.stopByRegNoMultiple(ctx.request.body);
     ctx.body = 'success';
   }
   async sendMessage() {

@@ -18,6 +18,7 @@ class DonghuaUniversityService extends Service {
       }
       currentData.id = data.id;
       currentData.name = data.name;
+      currentData.status = data.status;
       currentData.address = data.address;
       currentData.birthday = data.birthday;
       currentData.cardNo = data.cardNo;
@@ -33,9 +34,6 @@ class DonghuaUniversityService extends Service {
       currentData.recruitDate = data.recruitDate;
       currentData.site = data.site;
       currentData.xueli = data.xueli;
-      // currentData.completeClass = data.completeClass;
-      // currentData.continueClass = data.continueClass;
-      // currentData.classLength = data.classLength;
       currentData.save();
       return currentData;
     }
@@ -106,6 +104,18 @@ class DonghuaUniversityService extends Service {
     currentData.status = status;
     currentData.save();
     return currentData;
+  }
+  async stopByRegNoMultiple({ regNoList, status }) {
+    const { app, ctx } = this;
+    const Op = app.Sequelize.Op;
+    return await ctx.model.DonghuaUniversity.update({ status }, {
+      where: {
+        regNo: {
+          [Op.or]: regNoList
+        },
+        status: 1
+      }
+    });
   }
   async removeById(id) {
     return await this.ctx.model.DonghuaUniversity.destroy({
