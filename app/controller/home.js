@@ -174,16 +174,18 @@ class HomeController extends Controller {
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
+            errorLog: data.message.toString(),
             status: 3
           });
         }
-      }).catch(async err => {
+      }).catch(async error => {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：错误信息`);
-        ctx.logger.info(err);
+        ctx.logger.info(error);
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
+          errorLog: error.toString(),
           status: 3
         });
       });
@@ -194,6 +196,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
+        errorLog: error.toString(),
         status: 3
       });
     }
@@ -236,6 +239,7 @@ class HomeController extends Controller {
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
+          errorLog: error.toString(),
           status: 3
         });
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:未正常获取资源id`);
@@ -286,17 +290,19 @@ class HomeController extends Controller {
           await driver.quit();
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
+            errorLog: data.message.toString(),
             status: 3
           });
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:${data.message}`);
         }
-      }).catch(async err => {
+      }).catch(async error => {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询失败，错误信息：`);
-        ctx.logger.info(err);
+        ctx.logger.info(error);
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
+          errorLog: error.toString(),
           status: 3
         });
       });
@@ -344,6 +350,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
+        errorLog: error.toString(),
         status: 3
       });
     }
@@ -414,6 +421,7 @@ class HomeController extends Controller {
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
         regNo: userInfo.regNo,
+        errorLog: error.toString(),
         status: 3
       });
     }
@@ -455,8 +463,7 @@ class HomeController extends Controller {
               const item = (data.learnRecords || [])[i];
               if (item.sectionContentId === currentClass.id) {
                 // 当前数据
-                ctx.logger.info(`${userInfo.regNo}${userInfo.name}:当前数据`);
-                ctx.logger.info(item);
+                ctx.logger.info(`${userInfo.regNo}${userInfo.name}:查询数据成功`);
                 if (item.completeState === 'Completed') {
                   // 播放完成
                   ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：播放完成`);
@@ -494,27 +501,30 @@ class HomeController extends Controller {
             // 设置刷课状态
             await ctx.service.donghuaUniversity.setInClass({
               regNo: userInfo.regNo,
+              errorLog: data.message.toString(),
               status: 3
             });
           }
-        }).catch(async err => {
+        }).catch(async error => {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询失败，错误信息：`);
-          ctx.logger.info(err);
+          ctx.logger.info(error);
           await driver.quit();
           // 设置刷课状态
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
+            errorLog: error.toString(),
             status: 3
           });
         });
-      } catch (err) {
+      } catch (error) {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:巡查程序出错，错误信息：`);
-        ctx.logger.info(err);
+        ctx.logger.info(error);
         clearInterval(timer);
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
+          errorLog: error.toString(),
           status: 3
         });
       }

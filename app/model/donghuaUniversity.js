@@ -142,6 +142,12 @@ module.exports = app => {
       field: 'status',
       comment: '是否正在上课 0未开始 1进行中  2完成 3出错暂停 4停止上课 5未绑定的微信 99内存过载'
     },
+    errorLog: {
+      type: DataTypes.STRING(2550),
+      allowNull: true,
+      field: 'error_log',
+      comment: '错误日志'
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: true,

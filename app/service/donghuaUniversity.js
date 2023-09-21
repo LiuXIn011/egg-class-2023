@@ -16,6 +16,9 @@ class DonghuaUniversityService extends Service {
         currentData.save();
         return false;
       }
+      if (currentData.status !== 3) {
+        currentData.errorLog = '';
+      }
       currentData.id = data.id;
       currentData.name = data.name;
       currentData.status = data.status;
@@ -53,7 +56,8 @@ class DonghuaUniversityService extends Service {
   }
   async setInClass({
     regNo,
-    status
+    status,
+    errorLog
   }) {
     const currentData = await this.ctx.model.DonghuaUniversity.findOne({
       where: {
@@ -62,6 +66,7 @@ class DonghuaUniversityService extends Service {
     });
     if (currentData) {
       currentData.status = status;
+      currentData.errorLog = errorLog || '';
       currentData.save();
       return currentData;
     }
@@ -92,7 +97,7 @@ class DonghuaUniversityService extends Service {
           [Op.ne]: 5
         }
       },
-      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status' ]
+      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status', 'errorLog' ]
     });
   }
   async updateStatusByRegNo({ regNo, status }) {

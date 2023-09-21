@@ -58,7 +58,11 @@
           <el-tag v-if="row.status==0" type="info">未开始</el-tag>
           <el-tag v-if="row.status==1">进行中</el-tag>
           <el-tag v-if="row.status==2" type="success">已完成</el-tag>
-          <el-tag v-if="row.status==3" type="danger">出错</el-tag>
+          <el-popover v-if="row.status==3" placement="top-start" title="错误信息" width="300" trigger="click"
+            :content="row.errorLog || '无'">
+            <el-tag slot="reference" type="danger">出错</el-tag>
+          </el-popover>
+
           <el-tag v-if="row.status==4" type="danger">停止上课</el-tag>
           <el-tag v-if="row.status==99" type="warning">内存过载</el-tag>
         </el-table-column>
