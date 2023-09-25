@@ -177,6 +177,18 @@ class HomeController extends Controller {
             errorLog: data.message.toString(),
             status: 3
           });
+          // 发送邮件通知
+          if (userInfo.email) {
+            await ctx.service.tools.sendMail(
+              userInfo.email,
+              '刷课提醒',
+              `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${data.message.toString()}</p>
+              `
+            );
+          }
         }
       }).catch(async error => {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：错误信息`);
@@ -188,6 +200,18 @@ class HomeController extends Controller {
           errorLog: error.toString(),
           status: 3
         });
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+          );
+        }
       });
     } catch (error) {
       ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程出错`);
@@ -199,6 +223,18 @@ class HomeController extends Controller {
         errorLog: error.toString(),
         status: 3
       });
+      // 发送邮件通知
+      if (userInfo.email) {
+        await ctx.service.tools.sendMail(
+          userInfo.email,
+          '刷课提醒',
+          `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+        );
+      }
     }
   }
   async openPage(
@@ -242,6 +278,18 @@ class HomeController extends Controller {
           errorLog: error.toString(),
           status: 3
         });
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+          );
+        }
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:未正常获取资源id`);
         ctx.logger.info(error);
       }
@@ -293,6 +341,18 @@ class HomeController extends Controller {
             errorLog: data.message.toString(),
             status: 3
           });
+          // 发送邮件通知
+          if (userInfo.email) {
+            await ctx.service.tools.sendMail(
+              userInfo.email,
+              '刷课提醒',
+              `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${data.message.toString()}</p>
+              `
+            );
+          }
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:${data.message}`);
         }
       }).catch(async error => {
@@ -305,6 +365,18 @@ class HomeController extends Controller {
           errorLog: error.toString(),
           status: 3
         });
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+          );
+        }
       });
 
       // 循环调用所有课程
@@ -353,6 +425,18 @@ class HomeController extends Controller {
         errorLog: error.toString(),
         status: 3
       });
+      // 发送邮件通知
+      if (userInfo.email) {
+        await ctx.service.tools.sendMail(
+          userInfo.email,
+          '刷课提醒',
+          `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+        );
+      }
     }
   }
   async setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo) {
@@ -424,6 +508,18 @@ class HomeController extends Controller {
         errorLog: error.toString(),
         status: 3
       });
+      // 发送邮件通知
+      if (userInfo.email) {
+        await ctx.service.tools.sendMail(
+          userInfo.email,
+          '刷课提醒',
+          `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+        );
+      }
     }
   }
   async inspectionClass(currentClass, driver, By, noStudyClassInfo, studentData, userInfo) {
@@ -497,24 +593,10 @@ class HomeController extends Controller {
             }
           } else {
             ctx.logger.error(`${userInfo.regNo}${userInfo.name}:刷课状态获取出错：${data.message}`);
-            await driver.quit();
-            // 设置刷课状态
-            await ctx.service.donghuaUniversity.setInClass({
-              regNo: userInfo.regNo,
-              errorLog: data.message.toString(),
-              status: 3
-            });
           }
         }).catch(async error => {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询失败，错误信息：`);
           ctx.logger.info(error);
-          await driver.quit();
-          // 设置刷课状态
-          await ctx.service.donghuaUniversity.setInClass({
-            regNo: userInfo.regNo,
-            errorLog: error.toString(),
-            status: 3
-          });
         });
       } catch (error) {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:巡查程序出错，错误信息：`);
@@ -527,6 +609,18 @@ class HomeController extends Controller {
           errorLog: error.toString(),
           status: 3
         });
+        // 发送邮件通知
+        if (userInfo.email) {
+          await ctx.service.tools.sendMail(
+            userInfo.email,
+            '刷课提醒',
+            `
+                <p>${userInfo.name}你好！</p>
+                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+                <p>错误信息：${error.toString()}</p>
+              `
+          );
+        }
       }
     }, 60000);
   }
