@@ -409,7 +409,7 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-              <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${noStudyClassInfo.length}</p>
+              <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${classLength}</p>
               <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
             `
           );
@@ -595,7 +595,7 @@ class HomeController extends Controller {
             ctx.logger.error(`${userInfo.regNo}${userInfo.name}:刷课状态获取出错：${data.message}`);
           }
         }).catch(async error => {
-          ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询失败，错误信息：`);
+          ctx.logger.error(`${userInfo.regNo}${userInfo.name}:课程服务器异常，错误信息：`);
           ctx.logger.info(error);
         });
       } catch (error) {

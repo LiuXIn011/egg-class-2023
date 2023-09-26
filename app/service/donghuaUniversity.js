@@ -97,7 +97,7 @@ class DonghuaUniversityService extends Service {
           [Op.ne]: 5
         }
       },
-      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status', 'errorLog' ]
+      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status', 'errorLog', 'createdAt', 'updatedAt' ]
     });
   }
   async updateStatusByRegNo({ regNo, status }) {

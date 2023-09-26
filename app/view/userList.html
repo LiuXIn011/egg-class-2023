@@ -37,9 +37,9 @@
       <el-table :data="userList" stripe border style="width: 100%" @selection-change="selectionChange">
         <el-table-column align="center" type="selection"></el-table-column>
         <el-table-column align="center" width="60px" type="index" label="序号"></el-table-column>
-        <el-table-column align="center" prop="name" #default="{row}" label="姓名">
+        <el-table-column align="center" prop="name" #default="{row}" label="姓名" width="160px">
           <el-row type="flex" align="middle" justify="center">
-            <el-image fit="cover" style="width: 60px; height: 60px;border-radius: 50%;"
+            <el-image fit="cover" style="width: 60px; height: 60px;border-radius: 50%;flex-shrink: 0;"
               :src="'https://dhcj.ct-edu.com.cn'+row.photoLink"
               :preview-src-list="['https://dhcj.ct-edu.com.cn'+row.photoLink]">
             </el-image>
@@ -58,13 +58,17 @@
           <el-tag v-if="row.status==0" type="info">未开始</el-tag>
           <el-tag v-if="row.status==1">进行中</el-tag>
           <el-tag v-if="row.status==2" type="success">已完成</el-tag>
-          <el-popover v-if="row.status==3" placement="top-start" title="错误信息" width="300" trigger="click"
+          <el-popover v-if="row.status==3" placement="top-end" title="错误信息" width="300" trigger="click"
             :content="row.errorLog || '无'">
             <el-tag slot="reference" type="danger">出错</el-tag>
           </el-popover>
 
           <el-tag v-if="row.status==4" type="danger">停止上课</el-tag>
           <el-tag v-if="row.status==99" type="warning">内存过载</el-tag>
+        </el-table-column>
+        <el-table-column align="center" #default="{row}" width="100px" label="(创建/更新)时间">
+          <p>{{row.createdAt}}</p>
+          <p>{{row.updatedAt}}</p>
         </el-table-column>
         <el-table-column align="center" #default="{row}" label="操作">
           <el-link v-if="row.status==1" type="danger" :underline="false" @click="stop(row.regNo)">停止上课</el-link>
