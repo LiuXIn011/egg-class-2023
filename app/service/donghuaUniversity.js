@@ -8,10 +8,9 @@ class DonghuaUniversityService extends Service {
     });
     if (currentData) {
       if (
-        currentData.status === 1 ||
-        currentData.status === 2
+        currentData.status === 1
       ) {
-        // 正在上课中  或已完成
+        // 正在上课中
         currentData.id = data.id;
         currentData.save();
         return false;
@@ -97,7 +96,10 @@ class DonghuaUniversityService extends Service {
           [Op.ne]: 5
         }
       },
-      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status', 'errorLog', 'createdAt', 'updatedAt' ]
+      attributes: [ 'regNo', 'name', 'email', 'mobilephone', 'orientEdutype', 'photoLink', 'completeClass', 'continueClass', 'classLength', 'status', 'errorLog', 'createdAt', 'updatedAt' ],
+      order: [
+        [ 'createdAt', 'DESC' ]
+      ]
     });
   }
   async updateStatusByRegNo({ regNo, status }) {

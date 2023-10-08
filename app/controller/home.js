@@ -34,6 +34,7 @@ class HomeController extends Controller {
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
+      .usingServer('http://192.168.186.130:9515/wd/hub')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
@@ -108,11 +109,22 @@ class HomeController extends Controller {
           } else {
             userInfo.status = 0;
           }
-          // 是否正在刷课
+          // 更新信息，并且校验是否正在刷课
           const isInclassFlag = await ctx.service.donghuaUniversity.create(userInfo);
           if (!isInclassFlag) {
             // 正在刷课不继续走下去
             ctx.logger.info(`${userInfo.regNo}${userInfo.name}:正在刷课！`);
+            // 发送邮件通知
+            if (userInfo.email) {
+              await ctx.service.tools.sendMail(
+                userInfo.email,
+                '刷课提醒',
+                `
+                  <p>${userInfo.name}你好！刷课任务已开始。</p>
+                  <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
+                `
+              );
+            }
             return;
           }
           // 内存过载
@@ -167,7 +179,7 @@ class HomeController extends Controller {
           ctx.logger.info(`${userInfo.regNo}${userInfo.name}:可学习的课程地址`);
           ctx.logger.info(allClassUrl);
           // 打开页面 获取上课信息
-          await this.openPage(0, allClassUrl, driver, By, 0, 0, [], 0, userInfo);
+          await this.openPage(0, allClassUrl, driver, By, 0, 1, [], 0, userInfo);
         } else {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：${data.message}`);
           await driver.quit();
@@ -192,7 +204,7 @@ class HomeController extends Controller {
         }
       }).catch(async error => {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：错误信息`);
-        ctx.logger.info(error);
+        ctx.logger.error(error);
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
@@ -206,10 +218,10 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+              <p>${userInfo.name}你好！</p>
+              <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+              <p>错误信息：${error.toString()}</p>
+            `
           );
         }
       });
@@ -229,10 +241,10 @@ class HomeController extends Controller {
           userInfo.email,
           '刷课提醒',
           `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+            <p>${userInfo.name}你好！</p>
+            <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+            <p>错误信息：${error.toString()}</p>
+          `
         );
       }
     }
@@ -254,7 +266,7 @@ class HomeController extends Controller {
       // 已经学过
       let completeClassLength = completeClassLengthData;
       // 学习中
-      let continueClassLength = continueClassLengthData;
+      const continueClassLength = continueClassLengthData;
       // 所有未学视频信息
       const noStudyClassInfo = noStudyClassInfoData;
       // 未学习的视频
@@ -284,14 +296,14 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+              <p>${userInfo.name}你好！</p>
+              <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+              <p>错误信息：${error.toString()}</p>
+            `
           );
         }
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:未正常获取资源id`);
-        ctx.logger.info(error);
+        ctx.logger.error(error);
       }
       ctx.logger.info(`${userInfo.regNo}${userInfo.name}:资源id为：${courseId}`);
       // 获取token
@@ -313,28 +325,29 @@ class HomeController extends Controller {
           // 拆分已学习数据
           const videoCompleted = (data.learnRecords || []).filter(item => item.completeState === 'Completed').map(item => item.sectionContentId);
           // 拆分学习中数据
-          const videoContinue = (data.learnRecords || []).filter(item => item.completeState === 'Continue').map(item => item.sectionContentId);
+          // const videoContinue = (data.learnRecords || []).filter(item => item.completeState === 'Continue').map(item => item.sectionContentId);
           // 组合url
           (data.sectionContents || []).forEach(item => {
             if (item.additionTypeCode === 'VIDEO') {
               if (videoCompleted.includes(item.id)) {
-              // 已经学过
+                // 已经学过
                 completeClassLength++;
-              } else if (videoContinue.includes(item.id)) {
-              // 学习中
-                continueClassLength++;
-                item.classPath = `https://www.learnin.com.cn/user/#/user/student/course/${courseId}/learn/${item.id}?hideChapter=true`;
-                noStudyClassInfo.push(item);
               } else {
-              // 未学习
+                // 未学习
                 classLength++;
                 item.classPath = `https://www.learnin.com.cn/user/#/user/student/course/${courseId}/learn/${item.id}?hideChapter=true`;
                 noStudyClassInfo.push(item);
               }
+              //  else if (videoContinue.includes(item.id)) {
+              // // 学习中
+              //   continueClassLength++;
+              //   item.classPath = `https://www.learnin.com.cn/user/#/user/student/course/${courseId}/learn/${item.id}?hideChapter=true`;
+              //   noStudyClassInfo.push(item);
+              // }
             }
           });
         } else {
-        // 设置刷课状态
+          // 设置刷课状态
           await driver.quit();
           await ctx.service.donghuaUniversity.setInClass({
             regNo: userInfo.regNo,
@@ -357,7 +370,7 @@ class HomeController extends Controller {
         }
       }).catch(async error => {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询失败，错误信息：`);
-        ctx.logger.info(error);
+        ctx.logger.error(error);
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
@@ -371,10 +384,10 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+              <p>${userInfo.name}你好！</p>
+              <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+              <p>错误信息：${error.toString()}</p>
+            `
           );
         }
       });
@@ -404,7 +417,7 @@ class HomeController extends Controller {
         // 开始上课
         await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
         // 发送邮件通知
-        if (userInfo.email) {
+        if (userInfo.email && classLength > 0) {
           await ctx.service.tools.sendMail(
             userInfo.email,
             '刷课提醒',
@@ -417,7 +430,7 @@ class HomeController extends Controller {
       }
     } catch (error) {
       ctx.logger.error(`${userInfo.regNo}${userInfo.name}:录播课列表查询出错`);
-      ctx.logger.info(error);
+      ctx.logger.error(error);
       await driver.quit();
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
@@ -431,10 +444,10 @@ class HomeController extends Controller {
           userInfo.email,
           '刷课提醒',
           `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+            <p>${userInfo.name}你好！</p>
+            <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+            <p>错误信息：${error.toString()}</p>
+          `
         );
       }
     }
@@ -444,20 +457,20 @@ class HomeController extends Controller {
     try {
       ctx.logger.info(`${userInfo.regNo}${userInfo.name}:剩余课程数量：${noStudyClassInfo.length}`);
       if (noStudyClassInfo.length === 0) {
-      // 停止巡查
+        // 关闭chrome
         await driver.quit();
         // 设置刷课状态
         await ctx.service.donghuaUniversity.setInClass({
           regNo: userInfo.regNo,
           status: 2
         });
-        ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程全部结束，停止巡查，感谢使用！`);
+        ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程全部结束，停止巡查。`);
         // 发送邮件通知
         if (userInfo.email) {
           await ctx.service.tools.sendMail(
             userInfo.email,
             '刷课提醒',
-            `${userInfo.name}你好！刷课任务已完成，详情可去学习平台查看。`
+            `${userInfo.name}你好！刷课任务已完成，详情可前往学习平台查看。感谢使用！`
           );
         }
         return;
@@ -500,7 +513,7 @@ class HomeController extends Controller {
       await this.inspectionClass(currentClass, driver, By, noStudyClassInfo, studentData, userInfo);
     } catch (error) {
       ctx.logger.error(`${userInfo.regNo}${userInfo.name}:上课程序运行出错`);
-      ctx.logger.info(error);
+      ctx.logger.error(error);
       await driver.quit();
       // 设置刷课状态
       await ctx.service.donghuaUniversity.setInClass({
@@ -514,10 +527,10 @@ class HomeController extends Controller {
           userInfo.email,
           '刷课提醒',
           `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+            <p>${userInfo.name}你好！</p>
+            <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+            <p>错误信息：${error.toString()}</p>
+          `
         );
       }
     }
@@ -596,11 +609,11 @@ class HomeController extends Controller {
           }
         }).catch(async error => {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:课程服务器异常，错误信息：`);
-          ctx.logger.info(error);
+          ctx.logger.error(error);
         });
       } catch (error) {
         ctx.logger.error(`${userInfo.regNo}${userInfo.name}:巡查程序出错，错误信息：`);
-        ctx.logger.info(error);
+        ctx.logger.error(error);
         clearInterval(timer);
         await driver.quit();
         // 设置刷课状态
@@ -615,10 +628,10 @@ class HomeController extends Controller {
             userInfo.email,
             '刷课提醒',
             `
-                <p>${userInfo.name}你好！</p>
-                <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
-                <p>错误信息：${error.toString()}</p>
-              `
+              <p>${userInfo.name}你好！</p>
+              <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
+              <p>错误信息：${error.toString()}</p>
+            `
           );
         }
       }

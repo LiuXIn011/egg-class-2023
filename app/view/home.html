@@ -95,7 +95,7 @@
       <img v-if="showQrcode" class="view-img" src="<%- qrcodePath %>" alt="" srcset="">
       <button v-if="showReload" class="view-btn" @click="reload">重新获取</button>
       <!-- <a v-if="isLogin" class="view-btn" href="/class/getProgressView?q=<%- uuid %>">进度查询链接</a> -->
-      <p v-if="isLogin && !email" class="view-danger-text">
+      <p v-if="isLogin && !email" class="view-danger-text" style="margin: 0;">
         请前往学习平台配置电子邮件地址！
       </p>
       <p v-if="isLogin && !email" class="view-danger-text">
