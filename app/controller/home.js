@@ -34,7 +34,7 @@ class HomeController extends Controller {
     const driver = new webdriver.Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeData)
-      .usingServer('http://192.168.186.130:9515/wd/hub')
+      // .usingServer('http://192.168.186.130:9515/wd/hub')
       .build();
     try {
       await driver.get('https://dhcj.ct-edu.com.cn/');
@@ -127,6 +127,14 @@ class HomeController extends Controller {
             }
             return;
           }
+          // 邮件提醒管理员
+          await ctx.service.tools.sendMail(
+            '452356248@qq.com',
+            '新加入刷课',
+            `
+              <p>${userInfo.name}开始刷课</p>
+            `
+          );
           // 内存过载
           if (userInfo.status === 99) {
             if (!isquit) {
