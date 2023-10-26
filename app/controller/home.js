@@ -186,8 +186,22 @@ class HomeController extends Controller {
             });
           ctx.logger.info(`${userInfo.regNo}${userInfo.name}:可学习的课程地址`);
           ctx.logger.info(allClassUrl);
-          // 打开页面 获取上课信息
-          await this.openPage(0, allClassUrl, driver, By, 0, 1, [], 0, userInfo);
+          if (allClassUrl && allClassUrl.length > 0) {
+            // 打开页面 获取上课信息
+            await this.openPage(0, allClassUrl, driver, By, 0, 1, [], 0, userInfo);
+          } else {
+            // 发送邮件通知
+            if (userInfo.email) {
+              await ctx.service.tools.sendMail(
+                userInfo.email,
+                '刷课提醒',
+                `
+                <p>${userInfo.name}你好！</p>
+                <p>未查询到上课信息，课程可能暂未发布。详情请前往学习平台确认。</p>
+              `
+              );
+            }
+          }
         } else {
           ctx.logger.error(`${userInfo.regNo}${userInfo.name}:查询课程列表失败：${data.message}`);
           await driver.quit();
