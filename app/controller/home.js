@@ -49,6 +49,8 @@ class HomeController extends Controller {
       ctx.logger.info('获取路径');
       const qrcodePath = await driver.wait(webdriver.until.elementLocated(By.css('.wrp_code>img')), 10000).getAttribute('src');
       const render = ctx.render('home.html', { qrcodePath, uuid });
+      // 退出iframe
+      driver.switchTo().defaultContent();
       // 获取token
       this.getToken(driver, By, uuid);
       return render;
