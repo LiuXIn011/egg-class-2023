@@ -124,6 +124,7 @@ class HomeController extends Controller {
                 `
                   <p>${userInfo.name}你好！刷课任务已开始。</p>
                   <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
+                  <p>QQ交流群：628240710</p>
                 `
               );
             }
@@ -200,6 +201,7 @@ class HomeController extends Controller {
                 `
                 <p>${userInfo.name}你好！</p>
                 <p>未查询到上课信息，课程可能暂未发布。详情请前往学习平台确认。</p>
+                <p>QQ交流群：628240710</p>
               `
               );
             }
@@ -222,6 +224,7 @@ class HomeController extends Controller {
                 <p>${userInfo.name}你好！</p>
                 <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
                 <p>错误信息：${data.message.toString()}</p>
+                <p>QQ交流群：628240710</p>
               `
             );
           }
@@ -245,6 +248,7 @@ class HomeController extends Controller {
               <p>${userInfo.name}你好！</p>
               <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
               <p>错误信息：${error.toString()}</p>
+              <p>QQ交流群：628240710</p>
             `
           );
         }
@@ -268,6 +272,7 @@ class HomeController extends Controller {
             <p>${userInfo.name}你好！</p>
             <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
             <p>错误信息：${error.toString()}</p>
+            <p>QQ交流群：628240710</p>
           `
         );
       }
@@ -323,6 +328,7 @@ class HomeController extends Controller {
               <p>${userInfo.name}你好！</p>
               <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
               <p>错误信息：${error.toString()}</p>
+              <p>QQ交流群：628240710</p>
             `
           );
         }
@@ -387,6 +393,7 @@ class HomeController extends Controller {
                 <p>${userInfo.name}你好！</p>
                 <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
                 <p>错误信息：${data.message.toString()}</p>
+                <p>QQ交流群：628240710</p>
               `
             );
           }
@@ -411,6 +418,7 @@ class HomeController extends Controller {
               <p>${userInfo.name}你好！</p>
               <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
               <p>错误信息：${error.toString()}</p>
+              <p>QQ交流群：628240710</p>
             `
           );
         }
@@ -448,6 +456,7 @@ class HomeController extends Controller {
             `
               <p>${userInfo.name}你好！刷课任务已开始，剩余课程数量：${classLength}</p>
               <a href="https://donghua.right-house.love/class/getProgressView?q=${userInfo.id}">进度查询</a>
+              <p>QQ交流群：628240710</p>
             `
           );
         }
@@ -471,6 +480,7 @@ class HomeController extends Controller {
             <p>${userInfo.name}你好！</p>
             <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
             <p>错误信息：${error.toString()}</p>
+            <p>QQ交流群：628240710</p>
           `
         );
       }
@@ -494,7 +504,10 @@ class HomeController extends Controller {
           await ctx.service.tools.sendMail(
             userInfo.email,
             '刷课提醒',
-            `${userInfo.name}你好！刷课任务已完成，详情可前往学习平台查看。感谢使用！`
+            `
+              ${userInfo.name}你好！刷课任务已完成，详情可前往学习平台查看。感谢使用！
+              <p>QQ交流群：628240710</p>
+            `
           );
         }
         return;
@@ -554,6 +567,7 @@ class HomeController extends Controller {
             <p>${userInfo.name}你好！</p>
             <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
             <p>错误信息：${error.toString()}</p>
+            <p>QQ交流群：628240710</p>
           `
         );
       }
@@ -648,7 +662,10 @@ class HomeController extends Controller {
                 await ctx.service.tools.sendMail(
                   userInfo.email,
                   '刷课提醒',
-                  errorText
+                  `
+                  <p>${errorText}</p>
+                  <p>QQ交流群：628240710</p>
+                  `
                 );
               }
             }
@@ -679,6 +696,7 @@ class HomeController extends Controller {
               <p>${userInfo.name}你好！</p>
               <p>刷课任务出现错误，请重新登录重试，或联系管理员！</p>
               <p>错误信息：${error.toString()}</p>
+              <p>QQ交流群：628240710</p>
             `
           );
         }
