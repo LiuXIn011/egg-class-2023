@@ -592,40 +592,64 @@ class HomeController extends Controller {
           data: formData
         }).then(async ({ data }) => {
           if (data.errorCode === 0) {
-            for (let i = 0; i < (data.learnRecords || []).length; i++) {
-              const item = (data.learnRecords || [])[i];
-              if (item.sectionContentId === currentClass.id) {
+            const hasCurrentClass = (data.learnRecords || []).some(item => item.sectionContentId === currentClass.id);
+            if (hasCurrentClass) {
+              for (let i = 0; i < (data.learnRecords || []).length; i++) {
+                const item = (data.learnRecords || [])[i];
+                if (item.sectionContentId === currentClass.id) {
                 // 当前数据
-                ctx.logger.info(`${userInfo.regNo}${userInfo.name}:查询数据成功`);
-                if (item.completeState === 'Completed') {
+                  ctx.logger.info(`${userInfo.regNo}${userInfo.name}:查询数据成功`);
+                  if (item.completeState === 'Completed') {
                   // 播放完成
-                  ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：播放完成`);
-                  ctx.logger.info('=======================================================================');
-                  clearInterval(timer);
-                  // 更新数据
-                  studentData.completeClass++;
-                  studentData.classLength--;
-                  if (noStudyClassInfo.length === 0) {
-                    studentData.continueClass = 0;
-                  } else {
-                    studentData.continueClass = 1;
-                  }
-                  await ctx.service.donghuaUniversity.updateClassLength(studentData);
-                  // 检测暂停状态
-                  const studentStatus = await ctx.service.donghuaUniversity.getStatusByRegNo(userInfo.regNo);
-                  if (studentStatus.status === 4) {
-                    ctx.logger.info(`${userInfo.regNo}${userInfo.name}:检测到暂停状态，停止上课！`);
-                    await driver.quit();
-                  } else {
+                    ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：播放完成`);
+                    ctx.logger.info('=======================================================================');
+                    clearInterval(timer);
+                    // 更新数据
+                    studentData.completeClass++;
+                    studentData.classLength--;
+                    if (noStudyClassInfo.length === 0) {
+                      studentData.continueClass = 0;
+                    } else {
+                      studentData.continueClass = 1;
+                    }
+                    await ctx.service.donghuaUniversity.updateClassLength(studentData);
+                    // 检测暂停状态
+                    const studentStatus = await ctx.service.donghuaUniversity.getStatusByRegNo(userInfo.regNo);
+                    if (studentStatus.status === 4) {
+                      ctx.logger.info(`${userInfo.regNo}${userInfo.name}:检测到暂停状态，停止上课！`);
+                      await driver.quit();
+                    } else {
                     // 继续上课
-                    await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
-                  }
-                } else {
+                      await this.setClassGoOn(noStudyClassInfo, driver, By, studentData, userInfo);
+                    }
+                  } else {
                   // 未结束
-                  ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：进行中`);
-                  ctx.logger.info('=======================================================================');
+                    ctx.logger.info(`${userInfo.regNo}${userInfo.name}:课程状态：进行中`);
+                    ctx.logger.info('=======================================================================');
+                  }
+                  break;
                 }
-                break;
+              }
+            } else {
+              const errorText = `${userInfo.regNo}${userInfo.name}:巡查程序出错，错误信息：无法获取课程：${currentClass.title}状态`;
+              ctx.logger.error(errorText);
+              ctx.logger.error(JSON.stringify(currentClass));
+              ctx.logger.error(JSON.stringify((data.learnRecords || [])));
+              clearInterval(timer);
+              await driver.quit();
+              // 设置刷课状态
+              await ctx.service.donghuaUniversity.setInClass({
+                regNo: userInfo.regNo,
+                errorLog: errorText,
+                status: 3
+              });
+              // 发送邮件通知
+              if (userInfo.email) {
+                await ctx.service.tools.sendMail(
+                  userInfo.email,
+                  '刷课提醒',
+                  errorText
+                );
               }
             }
           } else {
